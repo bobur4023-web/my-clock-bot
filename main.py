@@ -5,10 +5,29 @@ import pytz
 from telethon import TelegramClient
 from telethon.tl.functions.account import UpdateProfileRequest
 from telethon.sessions import StringSession
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import threading
 
 api_id = 39948328
 api_hash = '31d3a0bd2a50061bc84665e3013daf4a'
 session_string = os.environ.get("SESSION_STRING")
+
+# Render talabini bajarish uchun kichik veb-server (portni ushlab turish uchun)
+class SimpleHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is running!")
+
+def run_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(('0.0.0.0', port), SimpleHandler)
+    server.serve_forever()
+
+# Veb-serverni alohida oqimda (thread) ishga tushiramiz
+server_thread = threading.Thread(target=run_server)
+server_thread.daemon = True
+server_thread.start()
 
 # Toshkent vaqt zonasi
 timezone = pytz.timezone('Asia/Tashkent')
